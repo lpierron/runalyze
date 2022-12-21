@@ -72,7 +72,7 @@ for (i, feature) in enumerate(columns):
     axs[i].plot(regression(data[feature], data.Distance, axs[i], result))
 
 # Adding St Nicolas Logo
-logo = plt.imread('st_nicolas.jpeg') # insert local path of the image.
+logo = plt.imread('st_nicolas_race//st_nicolas.jpeg') # insert local path of the image.
 # imagebox = OffsetImage(logo, zoom = 0.15)
 # ab = AnnotationBbox(imagebox, (0, 0), frameon = False)
 # axs[0].add_artist(ab)
