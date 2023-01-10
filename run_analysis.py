@@ -37,6 +37,28 @@ def regression(y, x, axes, ruptures):
             verticalalignment='bottom')
 
     return reg
+    
+def fastest_distance(jalons, duration, distance=1.000):
+    """
+    Compute fastest interval of distance in kilometer.
+    jalons : list of cumulative distance in kilometers
+    duration : list of cumulative time in seconds
+    
+    return : (i, j, time) or None
+    """
+    if len(jalons) != len(duration): return None
+    if jalons[-1] < distance: return None
+    best_i, best_j = 0, -1
+    best_time = duration[-1]
+    j = 0
+    for i, d in enumerate(jalons):
+        while (j < len(jalons)) and (jalons[j] < d+distance): j += 1
+        if j >= len(jalons): break
+        if (duration[j] - duration[i]) < best_time:
+            best_time = duration[j] - duration[i]
+            best_i, best_j = i, j
+            # print(jalons[i], jalons[j], best_i, best_j, best_time)
+    return best_i, best_j, best_time
 
 # reading datas
 def analysis(filename, title=""):
@@ -69,6 +91,13 @@ def analysis(filename, title=""):
     kms = [distance_cumulee[distance_cumulee >= km].index[0] for km in range(1, 1 + int(distance_cumulee.iloc[-1]))]
     print("Bornes kilometriques : ", kms + [nrows])
 
+    # Detection du meilleur temps au km
+    fastest_km = fastest_distance(data.Distance.values.tolist(), data.CumDuration.values.tolist())
+    if fastest_km:
+        i, j, t = fastest_km
+        temps = datetime.timedelta(seconds=t)
+        print("Fastest km:", str(temps), data.Distance.iloc[i], data.Distance.iloc[j])
+    
     # detection des changements de rythme
     algo = rpt.Pelt(model="rbf").fit(signal)
     result = algo.predict(pen=9)
