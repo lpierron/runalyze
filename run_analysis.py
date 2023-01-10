@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 
 import ruptures as rpt
 
+def seconds2chrono(seconds):
+    return str(datetime.timedelta(seconds=seconds))
+    
 def regression(y, x, axes, ruptures):
     """
     Computing regression return lines to plot.
@@ -60,6 +63,17 @@ def fastest_distance(jalons, duration, distance=1.000):
             # print(jalons[i], jalons[j], best_i, best_j, best_time)
     return best_i, best_j, best_time
 
+def show_fastest_distance(ax, fastest_distance):
+    y0, y1 = ax.get_ylim()
+    y_arrow = y0 + (y1 - y0)*0.5
+    i, j, t = fastest_distance
+    ax.annotate("", xy=(i, y_arrow), xytext=(j, y_arrow),
+                arrowprops=dict(arrowstyle="<->", color="purple"))
+    ax.annotate(seconds2chrono(t),
+                 xy=((i+j)/2, y_arrow),
+                 xytext=(-10, 5),
+                 textcoords='offset points')
+                
 # reading datas
 def analysis(filename, title=""):
   
@@ -95,8 +109,7 @@ def analysis(filename, title=""):
     fastest_km = fastest_distance(data.Distance.values.tolist(), data.CumDuration.values.tolist())
     if fastest_km:
         i, j, t = fastest_km
-        temps = datetime.timedelta(seconds=t)
-        print("Fastest km:", str(temps), data.Distance.iloc[i], data.Distance.iloc[j])
+        print("Fastest km:", seconds2chrono(t), data.Distance.iloc[i], data.Distance.iloc[j])
     
     # detection des changements de rythme
     algo = rpt.Pelt(model="rbf").fit(signal)
@@ -114,8 +127,7 @@ def analysis(filename, title=""):
     print("Temps des ruptures : ", ruptures_time)
     start = 0
     for seconds in ruptures_time:
-        sec = datetime.timedelta(seconds=int(seconds-start))
-        print(str(sec), )
+        print(seconds2chrono(int(seconds-start)), )
         start = seconds
     
     # display
@@ -123,6 +135,7 @@ def analysis(filename, title=""):
     for i, data_name in enumerate(columns):
         axs[i].set_ylabel(data_name)
         axs[i].set_xticks(result, ruptures_km)
+        show_fastest_distance(axs[i], fastest_km)
 
     # for each segment computing regression
     for (i, feature) in enumerate(columns):
