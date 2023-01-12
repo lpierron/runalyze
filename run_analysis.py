@@ -102,14 +102,24 @@ def analysis(filename, title=""):
     signal = data[columns]
 
     distance_cumulee = data.Distance
+
+    # fastest time for different distances
+    print("\n#### FASTEST TIME ####")
+    distances = [("1 km", 1.000), ("1 mile", 1.60934), ("5 kms", 5.000), ("10 kms", 10.000),
+                ("semi-marathon", 21.100), ("marathon", 42.195)]
+    fastest_d = {}
+    jalons, timing = distance_cumulee.tolist(), data.CumDuration.values.tolist()
+    for (dist_name, dist_value) in distances:
+      fastest_d[dist_name] = fastest_distance(jalons, timing, dist_value)
+      if fastest_d[dist_name]:
+          i, j, t = fastest_d[dist_name]
+          print(f"Fastest {dist_name}:", seconds2chrono(t), data.Distance.iloc[i], data.Distance.iloc[j])
+    fastest_km = fastest_d["1 km"]
+    print()
+        
+    # finding the kilometers limits
     kms = [distance_cumulee[distance_cumulee >= km].index[0] for km in range(1, 1 + int(distance_cumulee.iloc[-1]))]
     print("Bornes kilometriques : ", kms + [nrows])
-
-    # Detection du meilleur temps au km
-    fastest_km = fastest_distance(data.Distance.values.tolist(), data.CumDuration.values.tolist())
-    if fastest_km:
-        i, j, t = fastest_km
-        print("Fastest km:", seconds2chrono(t), data.Distance.iloc[i], data.Distance.iloc[j])
     
     # detection des changements de rythme
     algo = rpt.Pelt(model="rbf").fit(signal)

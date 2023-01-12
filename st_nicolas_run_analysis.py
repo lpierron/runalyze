@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
 import ruptures as rpt
 
+from run_analysis import fastest_distance, seconds2chrono
+
 def regression(y, x, axes, ruptures):
     """
     Computing regression return lines to plot.
@@ -47,6 +49,17 @@ data["Cadence"] = 2*data.Cadence
 columns = ["Speed", "HeartRate", "Allure", "Cadence", "PowerCalculated"]
 signal = data[columns]
 
+# fastest time for different distances
+distances = [("1 km", 1.000), ("1 mile", 1.60934), ("5 kms", 5.000), ("10 kms", 10.000)]
+fastest_d = {}
+jalons, timing = data.Distance.values.tolist(), data.CumDuration.values.tolist()
+for (dist_name, dist_value) in distances:
+  fastest_d[dist_name] = fastest_distance(jalons, timing, dist_value)
+  if fastest_d[dist_name]:
+      i, j, t = fastest_d[dist_name]
+      print(f"Fastest {dist_name}:", seconds2chrono(t), data.Distance.iloc[i], data.Distance.iloc[j])
+fastest_km = fastest_d["1 km"]
+    
 d = data.Distance
 kms = [d[d >= km].index[0] for km in range(1,11)]
 print("Bornes kilometriques : ", kms)
